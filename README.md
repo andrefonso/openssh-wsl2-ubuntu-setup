@@ -13,8 +13,7 @@ Este tutorial ensina como instalar, configurar e garantir que o serviço OpenSSH
 - [Configuração do SSH](#configuração-do-ssh)
 - [Ativação do SSH automaticamente no WSL2](#ativação-do-ssh-automaticamente-no-wsl2)
 - [Verificando o status do SSH](#verificando-o-status-do-ssh)
-- [Notas importantes](#notas-importantes)
-- [Licença](#licença)
+
 
 ## Pré-requisitos
 
@@ -47,47 +46,58 @@ Este tutorial ensina como instalar, configurar e garantir que o serviço OpenSSH
    sudo nano /etc/ssh/sshd_config
    ```
 
-2. Verifique e ajuste as seguintes opções:
+2. Verifique e ajuste as seguintes opções ou as incluas no arquivo:
 
    ```
+   Include /etc/ssh/sshd_config.d/*.conf
    Port 22
-   PermitRootLogin no
    PasswordAuthentication yes
+   KbdInteractiveAuthentication no
    ```
 
 3. Salve (`CTRL + O`) e saia (`CTRL + X`).
 
+4. Se quiser usar systemd no WSL2 (funciona no Ubuntu 22.04 pra cima, com Windows 11 atualizado), você precisa alterar o arquivo /etc/wsl.conf dentro do WSL:
+
+   - Abra o WSL2 (Ubuntu).
+
+   - Edite ou crie o arquivo /etc/wsl.conf:
+  
+   ```sh
+   sudo nano /etc/wsl.conf
+   ```
+
+   - Coloque o seguinte conteúdo:
+  
+   ```sh
+   [boot]
+   systemd=true
+   ```
+
+   - Salve e feche.
+
+   - Depois, no Windows, reinicie o WSL.
+
 ## Ativação do SSH automaticamente no WSL2
 
-No WSL2, os serviços não iniciam automaticamente como em uma instalação tradicional do Linux.  
-Para iniciar o SSH sempre que o Ubuntu abrir:
+1. Crie as chaves de host do SSH digitando o seguinte comando:
 
-1. Edite o arquivo `.bashrc` do seu usuário:
-
-   ```bash
-   nano ~/.bashrc
+   ```sh
+   sudo ssh-keygen -A
    ```
 
-2. Adicione o seguinte bloco ao final do arquivo:
+2. Depois disso, inicie o SSH:
 
-   ```bash
-   # Iniciar o OpenSSH Server automaticamente no WSL2
-   sudo service ssh status > /dev/null || sudo service ssh start
+   ```sh
+   sudo service ssh start
    ```
 
-3. Salve e feche (`CTRL + O`, `ENTER`, `CTRL + X`).
-
-4. Aplique imediatamente:
-
-   ```bash
-   source ~/.bashrc
-   ```
 
 ## Verificando o status do SSH
 
 Para verificar se o SSH está rodando:
 
-```bash
+```sh
 sudo service ssh status
 ```
 
@@ -99,22 +109,7 @@ Active: active (running)
 
 Para iniciar o serviço manualmente (se necessário):
 
-```bash
+```sh
 sudo service ssh start
 ```
 
-## Notas importantes
-
-- **Mudança de IP:** O WSL2 atribui um novo IP a cada reinicialização do Windows. Para descobrir o IP atual:
-
-  ```bash
-  hostname -I
-  ```
-
-- **Permissão sem senha (opcional):** Para evitar a necessidade de senha para iniciar o serviço SSH, você pode configurar o `sudo` para não exigir senha para o comando `service ssh start`. (Atenção: isso pode ter implicações de segurança.)
-
-- **Após atualizações:** Depois de atualizações do sistema (`apt upgrade`), confirme se o OpenSSH Server continua instalado e funcionando.
-
-## Licença
-
-Distribuído livremente para fins educativos.
